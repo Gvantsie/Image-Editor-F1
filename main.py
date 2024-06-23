@@ -1,31 +1,28 @@
-from PIL import Image
-from PIL import ImageFilter
+import os
 
-with Image.open("bunny.jpg") as original_image:
-    print("მოცემული ფოტოს მახასიათებლებია:")
-    print("ზომა:", original_image.size)
-    print("ფორმატი:", original_image.format)
-    print("ფოტოს ტიპი:", original_image.mode)
-    original_image.show()
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QFileDialog
+from PyQt5.uic import loadUi
 
-    # გავხადოთ ფოტო შავ-თეთრი
-    image_bw = original_image.convert("L")
-    image_bw.save("bunny_bw.jpg")
-    print("შეცვლილი მახასიათებელია:")
-    print("ფოტოს ტიპი:", image_bw.mode)
-    image_bw.show()
 
-    # გავხადოთ ფოტო დაბურული
-    image_blured = original_image.filter(ImageFilter.BLUR)
-    image_blured.save("bunny_blurred.jpg")
-    image_blured.show()
+class EditorWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        loadUi("design.ui", self)  # შემოვიტანეთ დიზაინის ფაილი
 
-    # ამოტრიალება 180 გრადუსით
-    image_up = original_image.transpose(Image.ROTATE_180)
-    image_up.save("bunny_up.jpg")
-    image_up.show()
+        self.image_files = []
+        self.folder.clicked.connect(self.open_folder)
+        self.current_folder = ""
 
-    # სარკის ეფექტი
-    image_mirror = original_image.transpose(Image.FLIP_LEFT_RIGHT)
-    image_mirror.save("bunny_mirrored.jpg")
-    image_mirror.show()
+    def open_folder(self):
+        folder = QFileDialog.getExistingDirectory(self, "აირჩიეთ ფოლდერი")
+        if folder:
+            self.current_folder = folder
+            self.image_files = [f for f in os.listdir(folder) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
+            self.file_list.clear()
+            self.file_list.addItems(self.image_files)
+
+
+app = QApplication([])
+window = EditorWindow()
+window.show()
+app.exec_()
